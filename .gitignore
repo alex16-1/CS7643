@@ -4,5 +4,4 @@ models_pth/
 features_train/
 features_val/
 
-*.pkl
 *.pth

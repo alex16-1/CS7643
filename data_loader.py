@@ -173,7 +173,9 @@ def get_loader(
                 vocab_file
             ), "vocab_file does not exist.  Change vocab_from_file to False to create vocab_file."
         img_folder = os.path.join("data", "images", "train2017")
-        annotations_file = os.path.join("data", "annotations", "captions_train2017")
+        annotations_file = os.path.join(
+            "data", "annotations", "captions_train2017.json"
+        )
 
     if mode == "val":
         assert batch_size == 1, "Please change batch_size to 1 if testing your model."
@@ -182,7 +184,7 @@ def get_loader(
         ), "Must first generate vocab.pkl from training data."
         assert vocab_from_file == True, "Change vocab_from_file to True."
         img_folder = os.path.join("data", "images", "val2017")
-        annotations_file = os.path.join("data", "annotations", "captions_val2017")
+        annotations_file = os.path.join("data", "annotations", "captions_val2017.json")
 
     # COCO caption dataset.
     dataset = CoCoDataset(
@@ -357,20 +359,16 @@ class CoCoFeatureDataset(data.Dataset):
             vocab_from_file,
         )
         self.features_folder = features_folder
-        if self.mode == "train":
-            self.coco = COCO(annotations_file)
-            self.ids = list(self.coco.anns.keys())
-            print("Obtaining caption lengths...")
-            all_tokens = [
-                nltk.tokenize.word_tokenize(
-                    str(self.coco.anns[self.ids[index]]["caption"]).lower()
-                )
-                for index in tqdm(np.arange(len(self.ids)))
-            ]
-            self.caption_lengths = [len(token) for token in all_tokens]
-        else:
-            test_info = json.loads(open(annotations_file).read())
-            self.paths = [item["file_name"] for item in test_info["images"]]
+        self.coco = COCO(annotations_file)
+        self.ids = list(self.coco.anns.keys())
+        print("Obtaining caption lengths...")
+        all_tokens = [
+            nltk.tokenize.word_tokenize(
+                str(self.coco.anns[self.ids[index]]["caption"]).lower()
+            )
+            for index in tqdm(np.arange(len(self.ids)))
+        ]
+        self.caption_lengths = [len(token) for token in all_tokens]
 
     def __getitem__(self, index):
         # obtain features and caption if in training mode
@@ -409,7 +407,7 @@ class CoCoFeatureDataset(data.Dataset):
             # return pre-processed image and caption tensors
             return features, caption
 
-        # obtain features if in test mode
+        # obtain features and img id if in test mode
         else:
             ann_id = self.ids[index]
             img_id = self.coco.anns[ann_id]["image_id"]
@@ -433,7 +431,7 @@ class CoCoFeatureDataset(data.Dataset):
                 zeros[: features.shape[0]] = features
                 features = zeros
 
-            return features
+            return features, img_id
 
     def get_train_indices(self):
         sel_length = np.random.choice(self.caption_lengths)
@@ -447,10 +445,7 @@ class CoCoFeatureDataset(data.Dataset):
         return indices
 
     def __len__(self):
-        if self.mode == "train":
-            return len(self.ids)
-        else:
-            return len(self.paths)
+        return len(self.ids)
 
 
 def collate_fn(data):

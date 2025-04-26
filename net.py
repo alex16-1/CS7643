@@ -173,6 +173,9 @@ class DecoderRNN(nn.Module):
 
     def sample(self, inputs, states=None, max_len=20):
         "accepts pre-processed image tensor (inputs) and returns predicted sentence (list of tensor ids of length max_len)"
+        # Project
+
+        inputs = self.input_projector(inputs)
 
         # Make sure input feature is of the expected shape by the LSTM
         inputs = inputs.view(1, 1, self.embed_size)
