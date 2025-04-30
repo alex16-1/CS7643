@@ -2,11 +2,14 @@
 # Credit: Laurent Veyssier
 # Adapted further for our use case
 
-import torch
-import net
-from data_loader import *
+import pickle
+import matplotlib.pyplot as plt
 
+import torch
 from nltk.translate.bleu_score import sentence_bleu
+
+from data_loader import *
+import net
 
 
 def evaluate_valid(pth_file, sanity_check=False):
@@ -45,7 +48,7 @@ def evaluate_valid(pth_file, sanity_check=False):
 
     for i, (features, img_id) in enumerate(valid_loader):
 
-        if i % 100 == 0:
+        if i % 1000 == 0:
             print(f"Processing sample {i}")
 
         features = features.to(device)
@@ -98,12 +101,42 @@ def evaluate_valid(pth_file, sanity_check=False):
         bleu_score += bleu
         total += 1
 
+    avg_bleu = bleu_score / total
     print(f"Avg. valid bleu: {bleu_score / total}")
+
+    return avg_bleu
+
+
+def plot_loss(combos):
+    plt.figure(figsize=(12, 6))
+
+    for combo in combos:
+        lr = combo[0]
+        epochs = combo[1]
+        embed = combo[2]
+        hidden = combo[3]
+        filename = f"caption_model_rcnn_lr_{lr}_epochs_{epochs}_batch_size_512_max_boxes_36_embed_dim_{embed}_hidden_dim_{hidden}.pth"
+        checkpoint = torch.load(filename)
+
+        loss = checkpoint["loss_history"]
+        epochs = range(10)
+        print(epochs)
+        print(loss)
+
+        plt.plot(epochs, loss, label=f"lr_{lr}_embed_dim_{embed}_hidden_dim{hidden}")
+
+    plt.savefig("test.png", dpi=300)
 
 
 def main():
-    pth_file = f"caption_model_rcnn_lr_0.001_epochs_10_batch_size_512_max_boxes_36_embed_dim_128_hidden_dim_256.pth"
-    evaluate_valid(pth_file, sanity_check=False)
+    combos = [
+        (0.001, 10, 64, 128),
+        (0.001, 10, 128, 64),
+        (0.001, 10, 128, 128),
+        (0.001, 10, 256, 256),
+    ]
+
+    plot_loss(combos)
 
 
 if __name__ == "__main__":

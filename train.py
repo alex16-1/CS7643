@@ -7,16 +7,11 @@ from net import *
 import nltk
 
 
-def train_rcnn_no_attention():
+def train_rcnn_no_attention(n_epochs=10, lr=0.001, embed_dim=128, hidden_dim=256):
 
     nltk.download("punkt_tab")
     batch_size = 512
-    n_epochs = 10
     max_boxes = 36
-    lr = 0.001
-
-    embed_dim = 128
-    hidden_dim = 256
     device = "cuda"
 
     train_loader = get_loader_features(
@@ -94,7 +89,7 @@ def train_rcnn_no_attention():
 
             current_loss += loss.item()
 
-    loss_history.append(current_loss / len(train_loader))
+        loss_history.append(current_loss / len(train_loader))
 
     torch.save(
         {
@@ -113,7 +108,39 @@ def train_rcnn_no_attention():
 
 
 def main():
-    train_rcnn_no_attention()
+    # Embed / hidden dim tests
+    # print(
+    #     "train_rcnn_no_attention(n_epochs=10, lr=0.001, embed_dim=256, hidden_dim=256)"
+    # )
+    # train_rcnn_no_attention(n_epochs=10, lr=0.001, embed_dim=256, hidden_dim=256)
+
+    # print(
+    #     "train_rcnn_no_attention(n_epochs=10, lr=0.001, embed_dim=128, hidden_dim=128)"
+    # )
+    # train_rcnn_no_attention(n_epochs=10, lr=0.001, embed_dim=128, hidden_dim=128)
+
+    # print(
+    #     "train_rcnn_no_attention(n_epochs=10, lr=0.001, embed_dim=64, hidden_dim=128)"
+    # )
+    # train_rcnn_no_attention(n_epochs=10, lr=0.001, embed_dim=64, hidden_dim=128)
+
+    # print(
+    #     "train_rcnn_no_attention(n_epochs=10, lr=0.001, embed_dim=128, hidden_dim=64)"
+    # )
+    # train_rcnn_no_attention(n_epochs=10, lr=0.001, embed_dim=128, hidden_dim=64)
+
+    # # Playing with lr
+    # print(
+    #     "train_rcnn_no_attention(n_epochs=10, lr=0.0001, embed_dim=128, hidden_dim=256)"
+    # )
+    # train_rcnn_no_attention(n_epochs=10, lr=0.0001, embed_dim=128, hidden_dim=256)
+
+    # print(
+    #     "train_rcnn_no_attention(n_epochs=10, lr=0.01, embed_dim=128, hidden_dim=256)"
+    # )
+    # train_rcnn_no_attention(n_epochs=10, lr=0.01, embed_dim=128, hidden_dim=256)
+
+    train_rcnn_no_attention(n_epochs=10, lr=0.001, embed_dim=128, hidden_dim=256)
 
 
 if __name__ == "__main__":
