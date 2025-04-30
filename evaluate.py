@@ -108,7 +108,7 @@ def evaluate_valid(pth_file, sanity_check=False):
 
 
 def plot_loss(combos):
-    plt.figure(figsize=(12, 6))
+    plt.figure(figsize=(5, 5))
 
     for combo in combos:
         lr = combo[0]
@@ -123,7 +123,13 @@ def plot_loss(combos):
         print(epochs)
         print(loss)
 
-        plt.plot(epochs, loss, label=f"lr_{lr}_embed_dim_{embed}_hidden_dim{hidden}")
+        plt.plot(epochs, loss, label=f"lr={lr}, embed={embed}, hidden={hidden}")
+
+    plt.xlabel("Epoch")
+    plt.ylabel("Loss")
+    plt.title("Train loss over Epochs for Different Hyperparameters")
+    plt.grid(True)
+    plt.legend()
 
     plt.savefig("test.png", dpi=300)
 
@@ -134,6 +140,9 @@ def main():
         (0.001, 10, 128, 64),
         (0.001, 10, 128, 128),
         (0.001, 10, 256, 256),
+        (0.001, 10, 128, 256),
+        (0.01, 10, 128, 256),
+        (0.0001, 10, 128, 256),
     ]
 
     plot_loss(combos)
