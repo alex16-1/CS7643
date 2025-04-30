@@ -145,7 +145,25 @@ def main():
         (0.0001, 10, 128, 256),
     ]
 
-    plot_loss(combos)
+    # plot_loss(combos)
+
+    res = dict()
+
+    for combo in combos:
+        print(
+            "#########################################################################################################################"
+        )
+        lr = combo[0]
+        epochs = combo[1]
+        embed = combo[2]
+        hidden = combo[3]
+        filename = f"caption_model_rcnn_lr_{lr}_epochs_{epochs}_batch_size_512_max_boxes_36_embed_dim_{embed}_hidden_dim_{hidden}.pth"
+
+        print(combo)
+        res[filename] = evaluate_valid(filename)
+
+    for key, value in res.items():
+        print(f"{key}: {value}")
 
 
 if __name__ == "__main__":
