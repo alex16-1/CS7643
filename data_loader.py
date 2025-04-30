@@ -178,7 +178,7 @@ def get_loader(
         )
 
     if mode == "val":
-        assert batch_size == 1, "Please change batch_size to 1 if testing your model."
+        # assert batch_size == 1, "Please change batch_size to 1 if testing your model."
         assert os.path.exists(
             vocab_file
         ), "Must first generate vocab.pkl from training data."
@@ -202,8 +202,7 @@ def get_loader(
     )
 
     if mode == "train":
-        # We are using a custom collate function here
-        # To zero pad sequences inferior to max length
+
         data_loader = data.DataLoader(
             dataset=dataset,
             batch_size=batch_size,
@@ -211,15 +210,17 @@ def get_loader(
             num_workers=num_workers,
             collate_fn=collate_fn,
         )
-
+    
     else:
-        # No collate function here because only images
+
         data_loader = data.DataLoader(
             dataset=dataset,
             batch_size=batch_size,
             shuffle=False,
             num_workers=num_workers,
+            collate_fn=collate_fn,
         )
+    
 
     return data_loader
 
@@ -254,7 +255,7 @@ class CoCoDataset(data.Dataset):
             vocab_from_file,
         )
         self.img_folder = img_folder
-        if self.mode == "train":
+        if self.mode == "train" or self.mode == "val":
             self.coco = COCO(annotations_file)
             self.ids = list(self.coco.anns.keys())
             print("Obtaining caption lengths...")
@@ -271,38 +272,25 @@ class CoCoDataset(data.Dataset):
 
     def __getitem__(self, index):
         # obtain image and caption if in training mode
-        if self.mode == "train":
-            ann_id = self.ids[index]
-            caption = self.coco.anns[ann_id]["caption"]
-            img_id = self.coco.anns[ann_id]["image_id"]
-            path = self.coco.loadImgs(img_id)[0]["file_name"]
+        ann_id = self.ids[index]
+        caption = self.coco.anns[ann_id]["caption"]
+        img_id = self.coco.anns[ann_id]["image_id"]
+        path = self.coco.loadImgs(img_id)[0]["file_name"]
 
-            # Convert image to tensor and pre-process using transform
-            image = Image.open(os.path.join(self.img_folder, path)).convert("RGB")
-            image = self.transform(image)
+        # Convert image to tensor and pre-process using transform
+        image = Image.open(os.path.join(self.img_folder, path)).convert("RGB")
+        image = self.transform(image)
 
-            # Convert caption to tensor of word ids.
-            tokens = nltk.tokenize.word_tokenize(str(caption).lower())
-            caption = []
-            caption.append(self.vocab(self.vocab.start_word))
-            caption.extend([self.vocab(token) for token in tokens])
-            caption.append(self.vocab(self.vocab.end_word))
-            caption = torch.Tensor(caption).long()
+        # Convert caption to tensor of word ids.
+        tokens = nltk.tokenize.word_tokenize(str(caption).lower())
+        caption = []
+        caption.append(self.vocab(self.vocab.start_word))
+        caption.extend([self.vocab(token) for token in tokens])
+        caption.append(self.vocab(self.vocab.end_word))
+        caption = torch.Tensor(caption).long()
 
-            # return pre-processed image and caption tensors
-            return image, caption
-
-        # obtain image if in test mode
-        else:
-            path = self.paths[index]
-
-            # Convert image to tensor and pre-process using transform
-            PIL_image = Image.open(os.path.join(self.img_folder, path)).convert("RGB")
-            orig_image = np.array(PIL_image)
-            image = self.transform(PIL_image)
-
-            # return original image and pre-processed image tensor
-            return orig_image, image
+        # return pre-processed image and caption tensors
+        return image, caption
 
     def get_train_indices(self):
         sel_length = np.random.choice(self.caption_lengths)
@@ -316,7 +304,7 @@ class CoCoDataset(data.Dataset):
         return indices
 
     def __len__(self):
-        if self.mode == "train":
+        if self.mode == "train" or self.mode == "val":
             return len(self.ids)
         else:
             return len(self.paths)
