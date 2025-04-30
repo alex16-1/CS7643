@@ -7,7 +7,9 @@ from net import *
 import nltk
 
 
-def train_rcnn_no_attention(n_epochs=10, lr=0.001, embed_dim=128, hidden_dim=256):
+def train_rcnn_no_attention(
+    n_epochs=10, lr=0.001, embed_dim=128, hidden_dim=256, sanity_check=False
+):
 
     nltk.download("punkt_tab")
     batch_size = 512
@@ -15,6 +17,15 @@ def train_rcnn_no_attention(n_epochs=10, lr=0.001, embed_dim=128, hidden_dim=256
     device = "cuda"
 
     train_loader = get_loader_features(
+        mode="train",
+        batch_size=batch_size,
+        vocab_threshold=5,
+        max_boxes=max_boxes,
+        vocab_file="vocab.pkl",
+    )
+
+    valid_loader = get_loader_features(
+        mode="val",
         batch_size=batch_size,
         vocab_threshold=5,
         max_boxes=max_boxes,
@@ -45,11 +56,12 @@ def train_rcnn_no_attention(n_epochs=10, lr=0.001, embed_dim=128, hidden_dim=256
         params, lr=lr, betas=(0.9, 0.999), eps=1e-08
     )  # "Show & Tell" paper uses SGD with no momentum
 
-    loss_history = []
+    loss_history_train = []
+    loss_history_valid = []
 
     for epoch in range(n_epochs):
 
-        current_loss = 0.0
+        current_loss_train = 0.0
 
         for batch, (features, captions) in enumerate(train_loader):
             decoder.train()
@@ -87,9 +99,48 @@ def train_rcnn_no_attention(n_epochs=10, lr=0.001, embed_dim=128, hidden_dim=256
                     f"Epoch [{epoch}/{n_epochs}], batch [{batch}/{len(train_loader)}], Loss: {loss.item():.4f}"
                 )
 
-            current_loss += loss.item()
+            current_loss_train += loss.item()
 
-        loss_history.append(current_loss / len(train_loader))
+            if sanity_check == True:
+                break
+
+        # Valid evaluation
+
+        with torch.no_grad():
+
+            decoder.eval()
+            current_loss_valid = 0.0
+
+            for batch, (features, captions) in enumerate(valid_loader):
+
+                features, captions = features.to(device), captions.to(device)
+
+                # Features are batches x max_boxes x feature dim
+
+                # Mean non zero boxes
+                mask = (
+                    features.abs().sum(dim=2) > 0
+                )  # Sum across feature dim, is dim batches x max_boxes
+                box_counts = mask.sum(dim=1)
+                box_counts[box_counts == 0] = 1  # In rare case where we have 0 boxes
+
+                features = features.sum(dim=1) / box_counts.unsqueeze(1)
+
+                # Forward pass
+                outputs = decoder(features, captions)
+
+                # Flatten for criterion
+                outputs = outputs.reshape(-1, vocab_length)
+                captions = captions.reshape(-1)
+
+                current_loss_valid += criterion(outputs, captions).item()
+
+        loss_history_train.append(current_loss_train / len(train_loader))
+        loss_history_valid.append(current_loss_valid / len(valid_loader))
+
+        print(
+            f"Epoch [{epoch}/{n_epochs}] Val Loss: {current_loss_valid / len(valid_loader)}"
+        )
 
     torch.save(
         {
@@ -99,11 +150,12 @@ def train_rcnn_no_attention(n_epochs=10, lr=0.001, embed_dim=128, hidden_dim=256
             "epochs": n_epochs,
             "batch_size": batch_size,
             "max_boxes": max_boxes,
-            "loss_history": loss_history,
+            "loss_history_train": loss_history_train,
+            "loss_history_valid": loss_history_valid,
             "embed_dim": embed_dim,
             "hidden_dim": hidden_dim,
         },
-        f"caption_model_rcnn_lr_{lr}_epochs_{n_epochs}_batch_size_{batch_size}_max_boxes_{max_boxes}_embed_dim_{embed_dim}_hidden_dim_{hidden_dim}.pth",
+        f"caption_model_rcnn_default_params.pth",
     )
 
 
@@ -140,7 +192,10 @@ def main():
     # )
     # train_rcnn_no_attention(n_epochs=10, lr=0.01, embed_dim=128, hidden_dim=256)
 
-    train_rcnn_no_attention(n_epochs=10, lr=0.001, embed_dim=128, hidden_dim=256)
+    # train_rcnn_no_attention(n_epochs=10, lr=0.001, embed_dim=128, hidden_dim=256)
+
+    # Default parameters model
+    train_rcnn_no_attention()
 
 
 if __name__ == "__main__":

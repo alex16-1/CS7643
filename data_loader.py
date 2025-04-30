@@ -178,7 +178,7 @@ def get_loader(
         )
 
     if mode == "val":
-        assert batch_size == 1, "Please change batch_size to 1 if testing your model."
+        # assert batch_size == 1, "Please change batch_size to 1 if testing your model."
         assert os.path.exists(
             vocab_file
         ), "Must first generate vocab.pkl from training data."
@@ -213,12 +213,12 @@ def get_loader(
         )
 
     else:
-        # No collate function here because only images
         data_loader = data.DataLoader(
             dataset=dataset,
             batch_size=batch_size,
             shuffle=False,
             num_workers=num_workers,
+            collate_fn=collate_fn,
         )
 
     return data_loader
@@ -254,7 +254,7 @@ class CoCoDataset(data.Dataset):
             vocab_from_file,
         )
         self.img_folder = img_folder
-        if self.mode == "train":
+        if self.mode == "train" or self.mode == "val":
             self.coco = COCO(annotations_file)
             self.ids = list(self.coco.anns.keys())
             print("Obtaining caption lengths...")
@@ -372,7 +372,7 @@ class CoCoFeatureDataset(data.Dataset):
 
     def __getitem__(self, index):
         # obtain features and caption if in training mode
-        if self.mode == "train":
+        if self.mode == "train" or self.mode == "val":
             ann_id = self.ids[index]
             caption = self.coco.anns[ann_id]["caption"]
             img_id = self.coco.anns[ann_id]["image_id"]
@@ -477,7 +477,7 @@ def get_loader_features(
     # https://github.com/LaurentVeyssier/Image-Captioning-Project-with-full-Encoder-Decoder-model/tree/master
     # Credit: Laurent Veyssier
 
-    assert mode in ["train", "test"], "mode must be one of 'train' or 'test'."
+    assert mode in ["train", "val"], "mode must be one of 'train' or 'val'."
     if vocab_from_file == False:
         assert (
             mode == "train"
@@ -493,8 +493,8 @@ def get_loader_features(
         annotations_file = os.path.join(
             "data", "annotations", "captions_train2017.json"
         )
-    if mode == "test":
-        assert batch_size == 1, "Please change batch_size to 1 if testing your model."
+    if mode == "val":
+        # assert batch_size == 1, "Please change batch_size to 1 if testing your model."
         assert os.path.exists(
             vocab_file
         ), "Must first generate vocab.pkl from training data."
@@ -531,9 +531,10 @@ def get_loader_features(
     else:
         data_loader = data.DataLoader(
             dataset=dataset,
-            batch_size=dataset.batch_size,
+            batch_size=batch_size,
             shuffle=False,
             num_workers=num_workers,
+            collate_fn=collate_fn,
         )
 
     return data_loader
