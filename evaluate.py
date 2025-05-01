@@ -145,7 +145,7 @@ def main():
         (0.0001, 10, 128, 256),
     ]
 
-    plot_loss(combos)
+    # plot_loss(combos)
 
     # res = dict()
 
@@ -164,6 +164,28 @@ def main():
 
     # for key, value in res.items():
     #     print(f"{key}: {value}")
+
+    plt.figure(figsize=(4, 2))
+
+    filename = f"caption_model_rcnn_default_params.pth"
+    checkpoint = torch.load(filename)
+
+    loss_train = checkpoint["loss_history_train"]
+    loss_val = checkpoint["loss_history_valid"]
+    epochs = range(10)
+
+    plt.plot(epochs, loss_train, label=f"Train")
+    plt.plot(epochs, loss_val, label=f"Valid")
+
+    plt.xlabel("Epoch")
+    plt.ylabel("Loss")
+    plt.title("Train, Validation Loss Over Epochs")
+    plt.grid(True)
+    plt.legend()
+    plt.tight_layout()
+    plt.ylim(1, 4)
+
+    plt.savefig("trainvalid_default.png", dpi=300)
 
 
 if __name__ == "__main__":
