@@ -3,6 +3,11 @@
 ## Environment requirements:
 
 The latest PyTorch version is sufficient for this project. We have tested our scripts with Python 3.10.16 and the latest PyTorch available.
+
+## Credits
+
+The base model from which all branches derivated is based on Laurent Veyssier's repository, https://github.com/LaurentVeyssier/Image-Captioning-Project-with-full-Encoder-Decoder-model/tree/master.
+
 # Image Captioning Architecture Evolution
 
 This project explores how replacing components of a baseline image captioning model (ResNet-50 + LSTM) with more advanced modules impacts performance. We evaluate and compare five architectures on the MS COCO 2017 dataset.
