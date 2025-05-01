@@ -34,6 +34,6 @@ Each branch is self-contained with model code, feature extractors, training pipe
 
 ---
 
+## Using the COCO 2017 dataset
 
-
-
+Please follow internal data loaders code to place your datasets in the working directory.
