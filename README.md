@@ -32,7 +32,7 @@ Each branch corresponds to a specific model pipeline:
 | `base_model`             | ResNet-50 encoder + LSTM decoder.                                       |
 | `rcnn_no_attention`      | Region proposals from R-CNN + LSTM decoder without attention.           |
 | `vit_encoder_lstm_decoder` | ViT encoder with patch embeddings + LSTM decoder.                      |
-| `dp_transformer`         | ResNet-50 encoder + Transformer-based decoder (cross-attention).        |
+| `transformer_decoder`         | ResNet-50 encoder + Transformer-based decoder (cross-attention).        |
 | `CLIP-FasterRCNN`        | Comparison using CLIP embeddings and Faster R-CNN-based proposals.      |
 
 Each branch is self-contained with model code, feature extractors, training pipeline, and outputs.
