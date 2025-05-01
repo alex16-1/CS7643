@@ -34,13 +34,6 @@ Each branch is self-contained with model code, feature extractors, training pipe
 
 ---
 
-## ⚙️ Setup
-
-### 1. Install dependencies
-
-```bash
-pip install -r requirements.txt
-
 
 
 
