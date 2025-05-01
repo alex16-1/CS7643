@@ -12,7 +12,7 @@ The base model from which all branches derivated is based on Laurent Veyssier's 
 
 This project explores how replacing components of a baseline image captioning model (ResNet-50 + LSTM) with more advanced modules impacts performance. We evaluate and compare five architectures on the MS COCO 2017 dataset.
 
-## 🧠 Architectures Compared
+## Architectures Compared
 
 - **Baseline**: ResNet-50 + LSTM  
 - **R-CNN + LSTM**  
@@ -22,7 +22,7 @@ This project explores how replacing components of a baseline image captioning mo
 
 ---
 
-## 📂 Repository Structure & Branches
+## Repository Structure & Branches
 
 Each branch corresponds to a specific model pipeline:
 
