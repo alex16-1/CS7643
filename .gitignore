@@ -1,0 +1,7 @@
+data/
+__pycache__/
+models_pth/
+features_train/
+features_val/
+
+*.pth

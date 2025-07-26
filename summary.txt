@@ -1,0 +1,20 @@
+caption_model_rcnn_lr_0.001_epochs_10_batch_size_512_max_boxes_36_embed_dim_128_hidden_dim_256.pth
+Avg. valid bleu: 0.12592059326424454
+
+caption_model_rcnn_lr_0.001_epochs_20_batch_size_512_max_boxes_36_embed_dim_64_hidden_dim_128.pth
+Avg. valid bleu: 0.10883600823619906
+
+caption_model_rcnn_lr_0.001_epochs_20_batch_size_512_max_boxes_36_embed_dim_128_hidden_dim_64.pth
+Avg. valid bleu: 0.06664869383467317
+
+caption_model_rcnn_lr_0.001_epochs_20_batch_size_512_max_boxes_36_embed_dim_128_hidden_dim_128.pth
+Avg. valid bleu: 0.10540693735531062
+
+caption_model_rcnn_lr_0.0001_epochs_20_batch_size_512_max_boxes_36_embed_dim_128_hidden_dim_256.pth
+Avg. valid bleu: 0.10393144989395822
+
+caption_model_rcnn_lr_0.001_epochs_20_batch_size_512_max_boxes_36_embed_dim_256_hidden_dim_256.pth
+Avg. valid bleu: 0.12436729762414427
+
+caption_model_rcnn_lr_0.01_epochs_20_batch_size_512_max_boxes_36_embed_dim_128_hidden_dim_256.pth
+Avg. valid bleu: 0.059325301751473894
